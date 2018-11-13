@@ -29,6 +29,8 @@ public:
 
 	void MoveForward(float AxisValue);
 	void MoveRight(float AxisValue);
+	void Shoot();
+	void Dash();
 
 private:
 	/** Top down camera */
@@ -42,5 +44,22 @@ private:
 	/** A decal that projects to the cursor location. */
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UDecalComponent* CursorToWorld;
+
+	UPROPERTY(EditAnywhere, Category = "Bullet")
+		TSubclassOf<class ABullet> Bullet;
+
+	UPROPERTY(VisibleAnywhere)
+		FRotator LookAt;
+
+	UPROPERTY(EditAnywhere, Category = "Bullet")
+		float BulletSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Bullet")
+		float BulletLife;
+
+	UPROPERTY(EditAnywhere, Category = "Movement")
+		float DashSpeed;
+
+	bool dashing = false;
 };
 

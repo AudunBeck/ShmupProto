@@ -12,6 +12,8 @@
 #include "Materials/Material.h"
 #include "Engine/World.h"
 #include "Kismet/KismetMathLibrary.h"
+#include "Bullet.h"
+
 AShmupProtoCharacter::AShmupProtoCharacter()
 {
 	// Set size for player capsule
@@ -86,8 +88,8 @@ void AShmupProtoCharacter::Tick(float DeltaSeconds)
 			CursorToWorld->SetWorldLocation(TraceHitResult.Location);
 			CursorToWorld->SetWorldRotation(CursorR);
 
-			FRotator NewRotation = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TraceHitResult.ImpactPoint);
-			SetActorRotation(FRotator(GetControlRotation().Pitch, NewRotation.Yaw, GetControlRotation().Roll));
+			LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TraceHitResult.ImpactPoint);
+			SetActorRotation(FRotator(GetControlRotation().Pitch, LookAt.Yaw, GetControlRotation().Roll));
 		}
 	}
 }
@@ -97,6 +99,9 @@ void AShmupProtoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AShmupProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShmupProtoCharacter::MoveRight);
+	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AShmupProtoCharacter::Shoot);
+	PlayerInputComponent->BindAction("RightClick", IE_Released, this, &AShmupProtoCharacter::Dash);
+
 
 }
 
@@ -114,4 +119,20 @@ void AShmupProtoCharacter::MoveRight(float AxisValue)
 	{
 		AddMovementInput(FVector(0.f, 1.f, 0.f), AxisValue);
 	}
+}
+
+void AShmupProtoCharacter::Shoot()
+{
+	UWorld* World = GetWorld();
+
+	ABullet* tempBullet = World->SpawnActor<ABullet>(Bullet, GetActorLocation(), FRotator(0.f, LookAt.Yaw, 0.f));
+	tempBullet->Speed = BulletSpeed;
+	tempBullet->LifeLength = BulletLife;
+}
+
+void AShmupProtoCharacter::Dash()
+{
+	FVector DashLocation = GetActorLocation() + GetActorForwardVector() * 200;
+
+	LaunchCharacter(GetActorForwardVector() * DashSpeed, false, false);
 }

@@ -37,6 +37,7 @@ void AShmupProtoPlayerController::SetupInputComponent()
 	InputComponent->BindTouch(EInputEvent::IE_Repeat, this, &AShmupProtoPlayerController::MoveToTouchLocation);
 
 	InputComponent->BindAction("ResetVR", IE_Pressed, this, &AShmupProtoPlayerController::OnResetVR);
+	//InputComponent->BindAction("RightClick", IE_Pressed, this, &AShmupProtoPlayerController::Dash);
 }
 
 void AShmupProtoPlayerController::OnResetVR()
@@ -126,5 +127,18 @@ void AShmupProtoPlayerController::MoveForward(float AxisValue)
 
 void AShmupProtoPlayerController::MoveRight(float AxisValue)
 {
+
+}
+
+void AShmupProtoPlayerController::Dash()
+{
+	FHitResult Hit;
+	GetHitResultUnderCursor(ECC_Visibility, true, Hit);
+
+	if (Hit.bBlockingHit)
+	{
+		// We hit something, move there
+		SetNewMoveDestination(Hit.ImpactPoint);
+	}
 
 }

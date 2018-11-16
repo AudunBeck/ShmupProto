@@ -32,6 +32,7 @@ public:
 	void MoveRight(float AxisValue);
 	void Shoot();
 	void Dash();
+	void Swap();
 	FRotator getLookAt();
 
 protected:

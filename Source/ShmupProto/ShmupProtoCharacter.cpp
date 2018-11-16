@@ -100,6 +100,9 @@ void AShmupProtoCharacter::Tick(float DeltaSeconds)
 
 	SetActorLocation(MainAdvLocation);
 	
+	//Disse to linjene under her plasserer de to andre karakterene bak hoved karakteren, prøver å ha de stående i et triangle, med den fremste først.
+	//men får ikke helt til. Kan du ordne noe annet? Trenger ikke bruke det under. 
+	// Om du ogsaa vil kan du se over Swap() og fikse den til aa bytte plass mellom alle 3. 
 	CurrentAdventurers[1]->SetActorLocation(MainAdvLocation + (MainAdvForward * FVector(-100.f, -100.f, 0.f)));
 	CurrentAdventurers[2]->SetActorLocation(MainAdvLocation + (MainAdvForward * FVector(-100.f, 100.f, 0.f)));
 }
@@ -111,6 +114,7 @@ void AShmupProtoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShmupProtoCharacter::MoveRight);
 	PlayerInputComponent->BindAction("RightClick", IE_Released, this, &AShmupProtoCharacter::Dash);
 	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AShmupProtoCharacter::Shoot);
+	PlayerInputComponent->BindAction("Swap", IE_Released, this, &AShmupProtoCharacter::Swap);
 
 
 }
@@ -119,7 +123,7 @@ void AShmupProtoCharacter::MoveForward(float AxisValue)
 {
 	if ((Controller != NULL) && (AxisValue != 0.0f))
 	{
-		CurrentAdventurers[0]->MoveForward(AxisValue);
+		
 		UE_LOG(LogTemp, Warning, TEXT("Controller Forward"));
 	}
 }
@@ -145,6 +149,11 @@ void AShmupProtoCharacter::Dash()
 	FVector DashLocation = GetActorLocation() + GetActorForwardVector() * 200;
 
 	LaunchCharacter(GetActorForwardVector() * DashSpeed, false, false);
+}
+
+void AShmupProtoCharacter::Swap()
+{
+	
 }
 
 FRotator AShmupProtoCharacter::getLookAt()

@@ -13,6 +13,7 @@
 #include "Engine/World.h"
 #include "Kismet/KismetMathLibrary.h"
 #include "Bullet.h"
+#include "Blueprint/AIBlueprintHelperLibrary.h"
 
 AShmupProtoCharacter::AShmupProtoCharacter()
 {
@@ -89,9 +90,18 @@ void AShmupProtoCharacter::Tick(float DeltaSeconds)
 			CursorToWorld->SetWorldRotation(CursorR);
 
 			LookAt = UKismetMathLibrary::FindLookAtRotation(GetActorLocation(), TraceHitResult.ImpactPoint);
-			SetActorRotation(FRotator(GetControlRotation().Pitch, LookAt.Yaw, GetControlRotation().Roll));
+			CurrentAdventurers[0]->SetActorRotation(FRotator(GetControlRotation().Pitch, LookAt.Yaw, GetControlRotation().Roll));
+			CurrentAdventurers[1]->SetActorRotation(FRotator(GetControlRotation().Pitch, LookAt.Yaw, GetControlRotation().Roll));
+			CurrentAdventurers[2]->SetActorRotation(FRotator(GetControlRotation().Pitch, LookAt.Yaw, GetControlRotation().Roll));
 		}
 	}
+	FVector MainAdvLocation = CurrentAdventurers[0]->GetActorLocation();
+	FVector MainAdvForward = CurrentAdventurers[0]->GetActorForwardVector();
+
+	SetActorLocation(MainAdvLocation);
+	
+	CurrentAdventurers[1]->SetActorLocation(MainAdvLocation + (MainAdvForward * FVector(-100.f, -100.f, 0.f)));
+	CurrentAdventurers[2]->SetActorLocation(MainAdvLocation + (MainAdvForward * FVector(-100.f, 100.f, 0.f)));
 }
 
 void AShmupProtoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -99,8 +109,8 @@ void AShmupProtoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInpu
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
 	PlayerInputComponent->BindAxis("MoveForward", this, &AShmupProtoCharacter::MoveForward);
 	PlayerInputComponent->BindAxis("MoveRight", this, &AShmupProtoCharacter::MoveRight);
-	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AShmupProtoCharacter::Shoot);
 	PlayerInputComponent->BindAction("RightClick", IE_Released, this, &AShmupProtoCharacter::Dash);
+	PlayerInputComponent->BindAction("LeftClick", IE_Released, this, &AShmupProtoCharacter::Shoot);
 
 
 }
@@ -109,7 +119,8 @@ void AShmupProtoCharacter::MoveForward(float AxisValue)
 {
 	if ((Controller != NULL) && (AxisValue != 0.0f))
 	{
-		AddMovementInput(FVector(1.f, 0.f, 0.f), AxisValue);
+		CurrentAdventurers[0]->MoveForward(AxisValue);
+		UE_LOG(LogTemp, Warning, TEXT("Controller Forward"));
 	}
 }
 
@@ -117,22 +128,45 @@ void AShmupProtoCharacter::MoveRight(float AxisValue)
 {
 	if ((Controller != NULL) && (AxisValue != 0.0f))
 	{
-		AddMovementInput(FVector(0.f, 1.f, 0.f), AxisValue);
+		CurrentAdventurers[0]->MoveRight(AxisValue);
+		UE_LOG(LogTemp, Warning, TEXT("Controller Right"));
 	}
 }
 
 void AShmupProtoCharacter::Shoot()
 {
-	UWorld* World = GetWorld();
-
-	ABullet* tempBullet = World->SpawnActor<ABullet>(Bullet, GetActorLocation(), FRotator(0.f, LookAt.Yaw, 0.f));
-	tempBullet->Speed = BulletSpeed;
-	tempBullet->LifeLength = BulletLife;
+	CurrentAdventurers[0]->Shoot();
 }
+
+
 
 void AShmupProtoCharacter::Dash()
 {
 	FVector DashLocation = GetActorLocation() + GetActorForwardVector() * 200;
 
 	LaunchCharacter(GetActorForwardVector() * DashSpeed, false, false);
+}
+
+FRotator AShmupProtoCharacter::getLookAt()
+{
+	return LookAt;
+}
+
+
+// Called when the game starts or when spawned
+void AShmupProtoCharacter::BeginPlay()
+{
+	Super::BeginPlay();
+
+	UWorld* World = GetWorld();
+
+	CurrentAdventurers[0] = World->SpawnActor<AClassBase>(Adventurers[0], GetActorLocation(), FRotator(0.f, LookAt.Yaw, 0.f));
+	CurrentAdventurers[0]->SetOwner(this);
+
+	CurrentAdventurers[1] = World->SpawnActor<AClassBase>(Adventurers[1], GetActorLocation() + FVector(-100.f, -100.f, 0.f) , FRotator(0.f, LookAt.Yaw, 0.f));
+	CurrentAdventurers[1]->SetOwner(this);
+
+	CurrentAdventurers[2] = World->SpawnActor<AClassBase>(Adventurers[2], GetActorLocation() + FVector(-100.f, 100.f, 0.f), FRotator(0.f, LookAt.Yaw, 0.f));
+	CurrentAdventurers[2]->SetOwner(this);
+
 }

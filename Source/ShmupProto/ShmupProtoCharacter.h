@@ -5,6 +5,7 @@
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
 #include "Components/InputComponent.h"
+#include "ClassBase.h"
 #include "ShmupProtoCharacter.generated.h"
 
 UCLASS(Blueprintable)
@@ -31,6 +32,13 @@ public:
 	void MoveRight(float AxisValue);
 	void Shoot();
 	void Dash();
+	FRotator getLookAt();
+
+protected:
+	// Called when the game starts or when spawned
+	virtual void BeginPlay() override;
+
+
 
 private:
 	/** Top down camera */
@@ -45,20 +53,17 @@ private:
 	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, meta = (AllowPrivateAccess = "true"))
 	class UDecalComponent* CursorToWorld;
 
-	UPROPERTY(EditAnywhere, Category = "Bullet")
-		TSubclassOf<class ABullet> Bullet;
-
 	UPROPERTY(VisibleAnywhere)
 		FRotator LookAt;
 
-	UPROPERTY(EditAnywhere, Category = "Bullet")
-		float BulletSpeed;
-
-	UPROPERTY(EditAnywhere, Category = "Bullet")
-		float BulletLife;
-
 	UPROPERTY(EditAnywhere, Category = "Movement")
 		float DashSpeed;
+
+	UPROPERTY(EditAnywhere, Category = "Adventurers")
+		class AClassBase* CurrentAdventurers[3]{ nullptr };
+
+	UPROPERTY(EditAnywhere, Category = "Adventurers")
+		TSubclassOf<class AClassBase> Adventurers[3];
 
 	bool dashing = false;
 };

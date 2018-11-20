@@ -62,7 +62,7 @@ AShmupProtoCharacter::AShmupProtoCharacter()
 
 void AShmupProtoCharacter::Tick(float DeltaSeconds)
 {
-    Super::Tick(DeltaSeconds);
+	Super::Tick(DeltaSeconds);
 
 	if (CursorToWorld != nullptr)
 	{
@@ -95,16 +95,33 @@ void AShmupProtoCharacter::Tick(float DeltaSeconds)
 			CurrentAdventurers[2]->SetActorRotation(FRotator(GetControlRotation().Pitch, LookAt.Yaw, GetControlRotation().Roll));
 		}
 	}
-	FVector MainAdvLocation = CurrentAdventurers[0]->GetActorLocation();
-	FVector MainAdvForward = CurrentAdventurers[0]->GetActorForwardVector();
+
+	if (frontLiner > 2)
+		frontLiner = 0;
+	if (frontLiner < 0)
+		frontLiner = 2;
+	FVector MainAdvLocation = CurrentAdventurers[frontLiner]->GetActorLocation();
+	FVector MainAdvForward = CurrentAdventurers[frontLiner]->GetActorForwardVector();
 
 	SetActorLocation(MainAdvLocation);
-	
 	//Disse to linjene under her plasserer de to andre karakterene bak hoved karakteren, prøver å ha de stående i et triangle, med den fremste først.
-	//men får ikke helt til. Kan du ordne noe annet? Trenger ikke bruke det under. 
-	// Om du ogsaa vil kan du se over Swap() og fikse den til aa bytte plass mellom alle 3. 
-	CurrentAdventurers[1]->SetActorLocation(MainAdvLocation + (MainAdvForward * FVector(-100.f, -100.f, 0.f)));
-	CurrentAdventurers[2]->SetActorLocation(MainAdvLocation + (MainAdvForward * FVector(-100.f, 100.f, 0.f)));
+//men får ikke helt til. Kan du ordne noe annet? Trenger ikke bruke det under. 
+// Om du ogsaa vil kan du se over Swap() og fikse den til aa bytte plass mellom alle 3.
+	if (frontLiner == 0)
+	{
+		CurrentAdventurers[1]->SetActorLocation(MainAdvLocation + (FVector(-100.f, -100.f, 0.f)));
+		CurrentAdventurers[2]->SetActorLocation(MainAdvLocation + (FVector(-100.f, 100.f, 0.f)));
+	}
+	if (frontLiner == 1)
+	{
+		CurrentAdventurers[2]->SetActorLocation(MainAdvLocation + (FVector(-100.f, -100.f, 0.f)));
+		CurrentAdventurers[0]->SetActorLocation(MainAdvLocation + (FVector(-100.f, 100.f, 0.f)));
+	}
+	if (frontLiner == 2)
+	{
+		CurrentAdventurers[0]->SetActorLocation(MainAdvLocation + (FVector(-100.f, -100.f, 0.f)));
+		CurrentAdventurers[1]->SetActorLocation(MainAdvLocation + (FVector(-100.f, 100.f, 0.f)));
+	}
 }
 
 void AShmupProtoCharacter::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
@@ -123,7 +140,7 @@ void AShmupProtoCharacter::MoveForward(float AxisValue)
 {
 	if ((Controller != NULL) && (AxisValue != 0.0f))
 	{
-		
+		CurrentAdventurers[0]->MoveForward(AxisValue);
 		UE_LOG(LogTemp, Warning, TEXT("Controller Forward"));
 	}
 }
@@ -153,7 +170,7 @@ void AShmupProtoCharacter::Dash()
 
 void AShmupProtoCharacter::Swap()
 {
-	
+	frontLiner++;
 }
 
 FRotator AShmupProtoCharacter::getLookAt()
